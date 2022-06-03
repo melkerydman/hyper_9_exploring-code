@@ -7,7 +7,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: "Webpack testing",
+      title: "Exploring code",
     }),
   ],
   module: {
