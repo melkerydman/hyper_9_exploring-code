@@ -3,23 +3,24 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   entry: {
-    index: "./src/index.ts",
+    index: "./src/scripts/index.ts",
   },
   plugins: [
     new HtmlWebpackPlugin({
       title: "Exploring code",
+      template: "./src/index.html",
     }),
   ],
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
-        use: "ts-loader",
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
         exclude: /node_modules/,
       },
       {
-        test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
+        test: /\.tsx?$/,
+        use: "ts-loader",
         exclude: /node_modules/,
       },
     ],
