@@ -1,10 +1,10 @@
 import "../style.css";
 import * as THREE from "three";
+import * as CANNON from "cannon-es";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 import { getRandomInt } from "./helpers/number";
-import { BlendingSrcFactor } from "three";
 
 let camera: THREE.PerspectiveCamera,
   scene: THREE.Scene,
@@ -23,6 +23,13 @@ let moveForward = false,
 let prevTime = performance.now();
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
+
+// Physics
+const world = new CANNON.World();
+world.gravity.set(0, -9.82, 0);
+let cubeMeshes: THREE.Object3D[] = [];
+let cubeBodies: CANNON.Body[] = [];
+let cubeLoaded = false;
 
 init();
 animate();
@@ -153,9 +160,24 @@ function init() {
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   scene.add(ground);
+  // Ground physics
+  const groundShape = new CANNON.Plane();
+  const groundBody = new CANNON.Body({ mass: 0 });
+  groundBody.addShape(groundShape);
+  groundBody.quaternion.setFromAxisAngle(
+    new CANNON.Vec3(1, 0, 0),
+    -Math.PI / 2
+  );
+  world.addBody(groundBody);
 
   // CUBE
   const cubeGeometry = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5);
+  const cubeParameters = {
+    width: cubeGeometry.parameters.width,
+    height: cubeGeometry.parameters.height,
+    depth: cubeGeometry.parameters.depth,
+  };
+  console.log(cubeGeometry);
   const cubeMaterial = new THREE.MeshPhysicalMaterial({
     // wireframe: true,
     color: 0x00ff00,
@@ -166,11 +188,29 @@ function init() {
   for (let i = 0; i < 50; i++) {
     const cubeClone = cube.clone();
     cubeClone.position.x = getRandomInt(-5, 6);
-    cubeClone.position.y = cube.geometry.parameters.height / 2; // Place item on ground
+    // cubeClone.position.y = cube.geometry.parameters.height / 2; // Place item on ground
+    cubeClone.position.y = 10; // Place item on ground
     cubeClone.position.z = getRandomInt(-5, 6);
-    console.dir(cubeClone);
     scene.add(cubeClone);
+    cubeMeshes.push(cubeClone);
+
+    // Cube physics
+    const cubeShape = new CANNON.Box(
+      new CANNON.Vec3(
+        cubeParameters.width,
+        cubeParameters.height,
+        cubeParameters.depth
+      )
+    );
+    const cubeBody = new CANNON.Body({ mass: 1 });
+    cubeBody.addShape(cubeShape);
+    cubeBody.position.x = cubeClone.position.x;
+    cubeBody.position.y = cubeClone.position.y;
+    cubeBody.position.z = cubeClone.position.z;
+    world.addBody(cubeBody);
+    cubeBodies.push(cubeBody);
   }
+  cubeLoaded = true;
 
   // EVENT LISTENERS
   window.addEventListener("resize", onWindowResize, false);
@@ -183,13 +223,38 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+const clock = new THREE.Clock();
+let d;
+
 function animate() {
   requestAnimationFrame(animate);
 
-  const time = performance.now();
+  if (clock) {
+    d = Math.min(clock.getDelta(), 0.1);
+    world.step(d);
+  }
 
+  const time = performance.now();
+  //PHYSICS
+  // Copy coordinates from Cannon to Three.js
+  if (cubeLoaded) {
+    cubeMeshes.forEach((c, i) => {
+      c.position.set(
+        cubeBodies[i].position.x,
+        cubeBodies[i].position.y,
+        cubeBodies[i].position.z
+      );
+      c.quaternion.set(
+        cubeBodies[i].quaternion.x,
+        cubeBodies[i].quaternion.y,
+        cubeBodies[i].quaternion.z,
+        cubeBodies[i].quaternion.w
+      );
+    });
+  }
+
+  // MOVEMENT
   if (controls.isLocked === true) {
-    console.log("animate");
     const delta = (time - prevTime) / 1000;
 
     velocity.x -= velocity.x * 10.0 * delta;
