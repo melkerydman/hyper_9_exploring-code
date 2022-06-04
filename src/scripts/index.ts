@@ -5,6 +5,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 import { getRandomInt } from "./helpers/number";
+import CannonDebugRenderer from "./helpers/cannonDebugRenderer";
 
 let camera: THREE.PerspectiveCamera,
   scene: THREE.Scene,
@@ -30,6 +31,8 @@ world.gravity.set(0, -9.82, 0);
 let cubeMeshes: THREE.Object3D[] = [];
 let cubeBodies: CANNON.Body[] = [];
 let cubeLoaded = false;
+
+let cannonDebugRenderer: CannonDebugRenderer;
 
 init();
 animate();
@@ -197,9 +200,9 @@ function init() {
     // Cube physics
     const cubeShape = new CANNON.Box(
       new CANNON.Vec3(
-        cubeParameters.width,
-        cubeParameters.height,
-        cubeParameters.depth
+        cubeParameters.width / 2,
+        cubeParameters.height / 2,
+        cubeParameters.depth / 2
       )
     );
     const cubeBody = new CANNON.Body({ mass: 1 });
@@ -211,6 +214,9 @@ function init() {
     cubeBodies.push(cubeBody);
   }
   cubeLoaded = true;
+
+  // DEBUG;
+  cannonDebugRenderer = new CannonDebugRenderer(scene, world);
 
   // EVENT LISTENERS
   window.addEventListener("resize", onWindowResize, false);
@@ -233,6 +239,7 @@ function animate() {
     d = Math.min(clock.getDelta(), 0.1);
     world.step(d);
   }
+  cannonDebugRenderer.update();
 
   const time = performance.now();
   //PHYSICS
