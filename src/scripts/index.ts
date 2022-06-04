@@ -54,8 +54,9 @@ function init() {
 
   const blocker = document.getElementById("blocker");
   const instructions = document.getElementById("instructions");
+  const aim = document.getElementById("aim");
 
-  if (blocker && instructions) {
+  if (blocker && instructions && aim) {
     instructions.addEventListener("click", function () {
       controls.lock();
     });
@@ -63,11 +64,13 @@ function init() {
     controls.addEventListener("lock", function () {
       instructions.style.display = "none";
       blocker.style.display = "none";
+      aim.style.display = "block";
     });
 
     controls.addEventListener("unlock", function () {
       blocker.style.display = "block";
       instructions.style.display = "";
+      aim.style.display = "none";
     });
   }
   scene.add(controls.getObject());
