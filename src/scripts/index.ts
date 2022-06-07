@@ -6,6 +6,7 @@ import { PointerLockControls } from "three/examples/jsm/controls/PointerLockCont
 import Stats from "three/examples/jsm/libs/stats.module";
 import { getRandomInt } from "./helpers/number";
 import CannonDebugRenderer from "./helpers/cannonDebugRenderer";
+import { Object3D, Vector3 } from "three";
 
 let camera: THREE.PerspectiveCamera,
   scene: THREE.Scene,
@@ -87,6 +88,10 @@ function init() {
   const onKeyDown = function (e: KeyboardEvent) {
     console.log(controls.isLocked);
     switch (e.code) {
+      case "KeyQ":
+        createWind();
+        break;
+
       case "ArrowUp":
       case "KeyW":
         moveForward = true;
@@ -289,3 +294,31 @@ function animate() {
 function render() {
   renderer.render(scene, camera);
 }
+
+const createWind = () => {
+  // Cube physics
+  const windShape = new CANNON.Sphere(0.1);
+  const windBody = new CANNON.Body({ mass: 1 });
+  windBody.addShape(windShape);
+  let vec = new THREE.Vector3();
+  camera.getWorldPosition(vec);
+  windBody.position.set(vec.x, vec.y, vec.z);
+
+  // Remove wind after 1 second
+  setTimeout(() => {
+    world.removeBody(windBody);
+  }, 1000);
+
+  // Adding velocity to wind
+  windBody.velocity = new CANNON.Vec3(
+    -Math.sin(camera.rotation.y),
+    0,
+    Math.cos(camera.rotation.y)
+  );
+  // windBody.position.x = vec.x;
+  // windBody.position.y = vec.y;
+  // windBody.position.z = vec.z;
+
+  console.log("camera position", vec);
+  world.addBody(windBody);
+};
