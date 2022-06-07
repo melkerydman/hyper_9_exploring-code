@@ -33,6 +33,14 @@ let cubeMeshes: THREE.Object3D[] = [];
 let cubeBodies: CANNON.Body[] = [];
 let cubeLoaded = false;
 
+// Wind
+// const winds = [] as CANNON.Body[];
+const winds = [] as {
+  shape: CANNON.Sphere;
+  body: CANNON.Body;
+  isAlive: boolean;
+}[];
+
 let cannonDebugRenderer: CannonDebugRenderer;
 
 init();
@@ -287,6 +295,24 @@ function animate() {
 
   prevTime = time;
 
+  // Wind
+  // go through bullets array and update position
+  // remove bullets when appropriate
+  for (let index = 0; index < winds.length; index++) {
+    console.log(winds[index]);
+    if (winds[index] === undefined) continue;
+    if (winds[index].isAlive === false) {
+      console.log(winds[index]);
+      winds.splice(index, 1);
+      continue;
+    }
+
+    // winds[index].body.position.set(
+    //   winds[index].body.velocity.x,
+    //   winds[index].body.velocity.y,
+    //   winds[index].body.velocity.z
+    // );
+  }
   render();
   stats.update();
 }
@@ -297,28 +323,41 @@ function render() {
 
 const createWind = () => {
   // Cube physics
-  const windShape = new CANNON.Sphere(0.1);
-  const windBody = new CANNON.Body({ mass: 1 });
-  windBody.addShape(windShape);
+  const wind = {
+    shape: new CANNON.Sphere(0.3),
+    body: new CANNON.Body({ mass: 1 }),
+    isAlive: true,
+  };
+  wind.body.addShape(wind.shape);
+
   let vec = new THREE.Vector3();
   camera.getWorldPosition(vec);
-  windBody.position.set(vec.x, vec.y, vec.z);
+  wind.body.position.set(vec.x, vec.y, vec.z);
+
+  // Adding velocity to wind
+  // wind.body.velocity = new CANNON.Vec3(
+  //   -Math.sin(camera.rotation.y) * 15,
+  //   15,
+  //   Math.cos(camera.rotation.y) * 15
+  // );
+
+  let vector = new THREE.Vector3(); // create once and reuse it!
+  camera.getWorldDirection(vector);
+  console.log(vector);
+
+  wind.body.velocity = new CANNON.Vec3(
+    vector.x * 45,
+    vector.y * 45,
+    vector.z * 45
+  );
 
   // Remove wind after 1 second
   setTimeout(() => {
-    world.removeBody(windBody);
-  }, 1000);
+    world.removeBody(wind.body);
+    wind.isAlive = false;
+  }, 2000);
 
-  // Adding velocity to wind
-  windBody.velocity = new CANNON.Vec3(
-    -Math.sin(camera.rotation.y),
-    0,
-    Math.cos(camera.rotation.y)
-  );
-  // windBody.position.x = vec.x;
-  // windBody.position.y = vec.y;
-  // windBody.position.z = vec.z;
+  winds.push(wind);
 
-  console.log("camera position", vec);
-  world.addBody(windBody);
+  world.addBody(wind.body);
 };
