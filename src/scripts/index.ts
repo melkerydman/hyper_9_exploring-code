@@ -334,17 +334,10 @@ const createWind = () => {
   camera.getWorldPosition(vec);
   wind.body.position.set(vec.x, vec.y, vec.z);
 
-  // Adding velocity to wind
-  // wind.body.velocity = new CANNON.Vec3(
-  //   -Math.sin(camera.rotation.y) * 15,
-  //   15,
-  //   Math.cos(camera.rotation.y) * 15
-  // );
-
   let vector = new THREE.Vector3(); // create once and reuse it!
   camera.getWorldDirection(vector);
-  console.log(vector);
 
+  // Adding velocity to wind
   wind.body.velocity = new CANNON.Vec3(
     vector.x * 45,
     vector.y * 45,
