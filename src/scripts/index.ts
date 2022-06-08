@@ -1,12 +1,13 @@
 import "../style.css";
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 import { getRandomInt } from "./helpers/number";
 import CannonDebugRenderer from "./helpers/cannonDebugRenderer";
-import { Object3D, Vector3 } from "three";
+import { recognizeSounds } from "./soundRecogniser";
+
+recognizeSounds();
 
 let camera: THREE.PerspectiveCamera,
   scene: THREE.Scene,
@@ -321,6 +322,7 @@ function render() {
   renderer.render(scene, camera);
 }
 
+// Create wind object
 const createWind = () => {
   // Cube physics
   const wind = {

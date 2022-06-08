@@ -1,3 +1,4 @@
+const webpack = require("webpack");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
@@ -9,6 +10,9 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: "Exploring code",
       template: "./src/index.html",
+    }),
+    new webpack.ProvidePlugin({
+      process: "process/browser",
     }),
   ],
   module: {
@@ -27,6 +31,10 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    fallback: {
+      // util: require.resolve("util/"),
+      fs: false,
+    },
   },
   output: {
     filename: "[name].bundle.js",
