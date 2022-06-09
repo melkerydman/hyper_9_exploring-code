@@ -23,19 +23,14 @@ async function createModel() {
 
   // check that model and metadata are loaded via HTTPS requests.
   await recognizer.ensureModelLoaded();
-  console.log(recognizer);
 
   return recognizer;
 }
 
-export async function recognizeSounds() {
-  console.log("hello");
+export async function recognizeSounds(callback: Function) {
+  console.log("Recognizing sounds.");
   const recognizer = await createModel();
-  const classLabels = recognizer.wordLabels(); // get class labels
-  const labelContainer = document.getElementById("label-container");
-  // for (let i = 0; i < classLabels.length; i++) {
-  //     labelContainer.appendChild(document.createElement("div"));
-  // }
+  const labels = recognizer.wordLabels(); // get class labels
 
   // listen() takes two arguments:
   // 1. A callback function that is invoked anytime a word is recognized.
@@ -43,15 +38,15 @@ export async function recognizeSounds() {
   recognizer.listen(
     // Did not work unless async since callback should return Promise<Void>(?)
     async (result) => {
-      console.log(result);
       const scores = result.scores; // probability of prediction for each class
-      // render the probability scores per class
-      // for (let i = 0; i < classLabels.length; i++) {
-      //     const classPrediction = classLabels[i] + ': ' + result.scores[i].toFixed(2);
-      //     labelContainer.childNodes[i].innerHTML = classPrediction;
-      // }
+      const indexOfMostConfident = argMax(Object.values(result.scores));
+      const sound = {
+        label: labels[indexOfMostConfident],
+        confidence: scores[indexOfMostConfident],
+      };
+      callback(sound);
+      // callback(labels[argMax(Object.values(result.scores))]);
     },
-
     {
       includeSpectrogram: true, // in case listen should return result.spectrogram
       probabilityThreshold: 0.75,
@@ -62,4 +57,11 @@ export async function recognizeSounds() {
 
   // Stop the recognition in 5 seconds.
   // setTimeout(() => recognizer.stopListening(), 5000);
+}
+
+// Returns largest argument
+function argMax(arr: any) {
+  return arr
+    .map((x: any, i: any) => [x, i])
+    .reduce((r: any, a: any) => (a[0] > r[0] ? a : r))[1];
 }

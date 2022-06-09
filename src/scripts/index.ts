@@ -7,7 +7,10 @@ import { getRandomInt } from "./helpers/number";
 import CannonDebugRenderer from "./helpers/cannonDebugRenderer";
 import { recognizeSounds } from "./soundRecogniser";
 
-recognizeSounds();
+let sound: { label: string; confidence: number };
+function updateSound(s: { label: string; confidence: number }) {
+  sound = s;
+}
 
 let camera: THREE.PerspectiveCamera,
   scene: THREE.Scene,
@@ -48,6 +51,8 @@ init();
 animate();
 
 function init() {
+  recognizeSounds(updateSound);
+
   // CAMERA
   camera = new THREE.PerspectiveCamera(
     30,
@@ -95,7 +100,6 @@ function init() {
   }
   scene.add(controls.getObject());
   const onKeyDown = function (e: KeyboardEvent) {
-    console.log(controls.isLocked);
     switch (e.code) {
       case "KeyQ":
         createWind();
@@ -194,7 +198,6 @@ function init() {
     height: cubeGeometry.parameters.height,
     depth: cubeGeometry.parameters.depth,
   };
-  console.log(cubeGeometry);
   const cubeMaterial = new THREE.MeshPhysicalMaterial({
     // wireframe: true,
     color: 0x00ff00,
@@ -247,6 +250,13 @@ const clock = new THREE.Clock();
 let d;
 
 function animate() {
+  // SOUND
+
+  if (sound) {
+    if (sound.label === "Wind" && sound.confidence > 0.85) {
+      createWind();
+    }
+  }
   requestAnimationFrame(animate);
 
   if (clock) {
@@ -300,19 +310,11 @@ function animate() {
   // go through bullets array and update position
   // remove bullets when appropriate
   for (let index = 0; index < winds.length; index++) {
-    console.log(winds[index]);
     if (winds[index] === undefined) continue;
     if (winds[index].isAlive === false) {
-      console.log(winds[index]);
       winds.splice(index, 1);
       continue;
     }
-
-    // winds[index].body.position.set(
-    //   winds[index].body.velocity.x,
-    //   winds[index].body.velocity.y,
-    //   winds[index].body.velocity.z
-    // );
   }
   render();
   stats.update();
