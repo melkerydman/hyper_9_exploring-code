@@ -7,9 +7,13 @@ import { getRandomInt } from "./helpers/number";
 import CannonDebugRenderer from "./helpers/cannonDebugRenderer";
 import { recognizeSounds } from "./soundRecogniser";
 
-let sound: { label: string; confidence: number };
-function updateSound(s: { label: string; confidence: number }) {
-  sound = s;
+// let sound: { label: string; confidence: number };
+// function updateSound(s: { label: string; confidence: number }) {
+//   sound = s;
+// }
+let sounds: { label: string; confidence: number; isActive: boolean }[];
+function updateSound(s: []) {
+  sounds = s;
 }
 
 let camera: THREE.PerspectiveCamera,
@@ -251,9 +255,11 @@ let d;
 
 function animate() {
   // SOUND
-
-  if (sound) {
-    if (sound.label === "Wind" && sound.confidence > 0.85) {
+  let blow = sounds?.filter((sound) => {
+    return sound.label === "Blow";
+  });
+  if (blow) {
+    if (blow[0].isActive) {
       createWind();
     }
   }

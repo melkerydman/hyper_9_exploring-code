@@ -8,7 +8,7 @@ import * as speechCommands from "@tensorflow-models/speech-commands";
 tf.getBackend();
 
 // the link to your model provided by Teachable Machine export panel
-const URL = "https://teachablemachine.withgoogle.com/models/Rta22WWsU/";
+const URL = "https://teachablemachine.withgoogle.com/models/CpusitpNa/";
 
 async function createModel() {
   const checkpointURL = URL + "model.json"; // model topology
@@ -31,6 +31,10 @@ export async function recognizeSounds(callback: Function) {
   console.log("Recognizing sounds.");
   const recognizer = await createModel();
   const labels = recognizer.wordLabels(); // get class labels
+  let sounds = labels.map((label) => {
+    return { label: label, confidence: 0, isActive: false };
+  });
+  console.log("sounds:", sounds);
 
   // listen() takes two arguments:
   // 1. A callback function that is invoked anytime a word is recognized.
@@ -38,14 +42,28 @@ export async function recognizeSounds(callback: Function) {
   recognizer.listen(
     // Did not work unless async since callback should return Promise<Void>(?)
     async (result) => {
+      // const scores = result.scores; // probability of prediction for each class
+      // const indexOfMostConfident = argMax(Object.values(result.scores));
+      // const sound = {
+      //   label: labels[indexOfMostConfident],
+      //   confidence: scores[indexOfMostConfident],
+      // };
+      // callback(sound);
       const scores = result.scores; // probability of prediction for each class
-      const indexOfMostConfident = argMax(Object.values(result.scores));
-      const sound = {
-        label: labels[indexOfMostConfident],
-        confidence: scores[indexOfMostConfident],
-      };
-      callback(sound);
-      // callback(labels[argMax(Object.values(result.scores))]);
+
+      sounds.forEach(
+        (
+          sound: {
+            label: string;
+            confidence: number | Float32Array;
+            isActive: boolean;
+          },
+          index: number
+        ) => {
+          sound.confidence = scores[index];
+          sound.isActive = scores[index] > 0.8 ? true : false;
+        }
+      );
     },
     {
       includeSpectrogram: true, // in case listen should return result.spectrogram
@@ -54,6 +72,8 @@ export async function recognizeSounds(callback: Function) {
       overlapFactor: 0.5, // probably want between 0.5 and 0.75. More info in README
     }
   );
+
+  callback(sounds);
 
   // Stop the recognition in 5 seconds.
   // setTimeout(() => recognizer.stopListening(), 5000);
