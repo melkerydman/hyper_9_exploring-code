@@ -27,6 +27,17 @@ module.exports = {
         use: "ts-loader",
         exclude: /node_modules/,
       },
+      {
+        test: /\.(glb|gltf|png)$/i,
+        type: "asset/resource",
+        generator: {
+          filename: "assets/models/[name][ext]",
+        },
+      },
+      {
+        test: /\.png/,
+        type: "asset/resource",
+      },
     ],
   },
   resolve: {
@@ -40,6 +51,7 @@ module.exports = {
     filename: "[name].bundle.js",
     path: path.resolve(__dirname, "dist"),
     clean: true,
+    // assetModuleFilename: "assets/[name][ext]",
   },
   optimization: {
     runtimeChunk: "single",

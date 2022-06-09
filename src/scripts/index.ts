@@ -2,10 +2,43 @@ import "../style.css";
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import Stats from "three/examples/jsm/libs/stats.module";
 import { getRandomInt } from "./helpers/number";
 import CannonDebugRenderer from "./helpers/cannonDebugRenderer";
 import { recognizeSounds } from "./soundRecogniser";
+
+let cabinMeshes: THREE.Object3D[] = [];
+let cabinBodies: CANNON.Body[] = [];
+
+const loader = new GLTFLoader();
+loader.load(
+  "./assets/models/cabin.glb",
+  function (gltf) {
+    gltf.scene.traverse(function (child) {
+      if ((child as THREE.Mesh).isMesh) {
+        console.log("mesh");
+        const m = child as THREE.Mesh;
+        m.receiveShadow = true;
+        m.castShadow = true;
+      }
+      // if (((child as THREE.Light)).isLight) {
+      //     const l = (child as THREE.Light)
+      //     l.castShadow = true
+      //     l.shadow.bias = -.003
+      //     l.shadow.mapSize.width = 2048
+      //     l.shadow.mapSize.height = 2048
+      // }
+    });
+    scene.add(gltf.scene);
+  },
+  (xhr) => {
+    console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+  },
+  (error) => {
+    console.log(error);
+  }
+);
 
 // let sound: { label: string; confidence: number };
 // function updateSound(s: { label: string; confidence: number }) {
