@@ -5,45 +5,10 @@ import { PointerLockControls } from "three/examples/jsm/controls/PointerLockCont
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import Stats from "three/examples/jsm/libs/stats.module";
 import { getRandomInt } from "./helpers/number";
+import CannonUtils from "./helpers/cannonUtils";
 import CannonDebugRenderer from "./helpers/cannonDebugRenderer";
 import { recognizeSounds } from "./soundRecogniser";
 
-let cabinMeshes: THREE.Object3D[] = [];
-let cabinBodies: CANNON.Body[] = [];
-
-const loader = new GLTFLoader();
-loader.load(
-  "./assets/models/cabin.glb",
-  function (gltf) {
-    gltf.scene.traverse(function (child) {
-      if ((child as THREE.Mesh).isMesh) {
-        console.log("mesh");
-        const m = child as THREE.Mesh;
-        m.receiveShadow = true;
-        m.castShadow = true;
-      }
-      // if (((child as THREE.Light)).isLight) {
-      //     const l = (child as THREE.Light)
-      //     l.castShadow = true
-      //     l.shadow.bias = -.003
-      //     l.shadow.mapSize.width = 2048
-      //     l.shadow.mapSize.height = 2048
-      // }
-    });
-    scene.add(gltf.scene);
-  },
-  (xhr) => {
-    console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-  },
-  (error) => {
-    console.log(error);
-  }
-);
-
-// let sound: { label: string; confidence: number };
-// function updateSound(s: { label: string; confidence: number }) {
-//   sound = s;
-// }
 let sounds: { label: string; confidence: number; isActive: boolean }[];
 function updateSound(s: []) {
   sounds = s;
@@ -229,7 +194,7 @@ function init() {
   world.addBody(groundBody);
 
   // CUBE
-  const cubeGeometry = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5);
+  const cubeGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
   const cubeParameters = {
     width: cubeGeometry.parameters.width,
     height: cubeGeometry.parameters.height,
