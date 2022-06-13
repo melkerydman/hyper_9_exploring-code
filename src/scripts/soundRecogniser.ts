@@ -31,6 +31,7 @@ export async function recognizeSounds(callback: Function) {
   console.log("Recognizing sounds.");
   const recognizer = await createModel();
   const labels = recognizer.wordLabels(); // get class labels
+  console.log(labels);
   let sounds = labels.map((label) => {
     return { label: label, confidence: 0, isActive: false };
   });

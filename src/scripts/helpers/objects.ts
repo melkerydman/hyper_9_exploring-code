@@ -2,6 +2,8 @@ import * as THREE from "three";
 import * as CANNON from "cannon-es";
 import { getRandomInt } from "./number";
 
+const firePalette = ["FF0000", "FE5A00", "FF9A01", "FECE00", "FFE809"];
+
 export const createFire = (
   camera: THREE.PerspectiveCamera,
   fire: THREE.Mesh,

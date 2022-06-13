@@ -95,6 +95,9 @@ const fireMaterial = new THREE.MeshPhysicalMaterial({
   color: "orange",
 });
 const fire = new THREE.Mesh(fireGeometry, fireMaterial);
+const fireLight = new THREE.PointLight(0xffffff, 1, 10);
+fireLight.position.set(0, 0, 0);
+fire.add(fireLight);
 
 const fireParameters = {
   width: fireGeometry.parameters.width,
@@ -127,9 +130,9 @@ function init() {
   // SCENE
   scene = new THREE.Scene();
   scene.add(new THREE.AxesHelper(50));
-  const color = 0x171717;
+  const color = 0x000000;
   scene.background = new THREE.Color(color);
-  scene.fog = new THREE.Fog(color, 10, 50);
+  scene.fog = new THREE.Fog(color, 5, 25);
 
   // const sky = new THREE.Mesh(
   //   new THREE.SphereGeometry(100, 32, 32),
@@ -239,10 +242,10 @@ function init() {
   document.addEventListener("keyup", onKeyUp);
 
   // LIGHT
-  const ambientLight = new THREE.AmbientLight(0xff0000, 0.5);
+  const ambientLight = new THREE.AmbientLight(0xf5e891, 0.1);
   scene.add(ambientLight);
 
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  const directionalLight = new THREE.DirectionalLight(0xf5e891, 0.5);
   directionalLight.position.set(-5, 15, -5);
   directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.width = 2048;
@@ -285,7 +288,7 @@ function init() {
   };
   const cubeMaterial = new THREE.MeshPhysicalMaterial({
     // wireframe: true,
-    color: 0x00ff00,
+    color: 0x5b301b,
   });
 
   const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
@@ -294,7 +297,7 @@ function init() {
     const cubeClone = cube.clone();
     cubeClone.position.x = getRandomInt(-5, 6);
     // cubeClone.position.y = cube.geometry.parameters.height / 2; // Place item on ground
-    cubeClone.position.y = 10; // Place item on ground
+    cubeClone.position.y = 0; // Place item on ground
     cubeClone.position.z = getRandomInt(-5, 6);
     scene.add(cubeClone);
     cubeMeshes.push(cubeClone);
@@ -307,7 +310,7 @@ function init() {
         cubeParameters.depth / 2
       )
     );
-    const cubeBody = new CANNON.Body({ mass: 1 });
+    const cubeBody = new CANNON.Body({ mass: 0 });
     cubeBody.addShape(cubeShape);
     cubeBody.position.x = cubeClone.position.x;
     cubeBody.position.y = cubeClone.position.y;
